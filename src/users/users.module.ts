@@ -1,7 +1,7 @@
 import { Injectable, Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UserService } from './user.service';
-import { APP_NAME, USER_HABITS } from './user.constant';
+import { APP_NAME, LoggerServiceAlias, USER_HABITS } from './user.constant';
 class MockUserService {
   findUsers() {
     return ['test'];
@@ -18,11 +18,34 @@ class UserHabitsFactory {
     return ['eat', 'sleep', 'work'];
   }
 }
+
+@Injectable()
+class LoggerService {
+  constructor() {
+    console.log('LoggerService created');
+  }
+}
+
+const loggerServiceAliasProvider = {
+  provide: LoggerServiceAlias,
+  useExisting: LoggerService,
+};
+
+@Injectable()
+class DatabaseConnection {
+  async connectToDB(): Promise<string> {
+    return await Promise.resolve('connectToDB successfully');
+  }
+}
 @Module({
   imports: [],
   controllers: [UsersController],
   providers: [
     UserHabitsFactory,
+    LoggerService,
+    loggerServiceAliasProvider,
+    DatabaseConnection,
+
     // standard provider
     {
       provide: UserService,
@@ -49,8 +72,15 @@ class UserHabitsFactory {
     },
     {
       provide: USER_HABITS,
-      useFactory: (userHabits: UserHabitsFactory) => userHabits.getHabits(), // Factory function
-      inject: [UserHabitsFactory], // Dependency injection
+      useFactory: async (
+        userHabits: UserHabitsFactory,
+        dbConnection: DatabaseConnection,
+      ) => {
+        const status = await dbConnection.connectToDB();
+        console.log(status);
+        return userHabits.getHabits();
+      }, // Factory function
+      inject: [UserHabitsFactory, DatabaseConnection], // Dependency injection
     },
   ],
 })
