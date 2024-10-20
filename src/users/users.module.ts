@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UserService } from './user.service';
+import { APP_NAME, USER_HABITS } from './user.constant';
 class MockUserService {
   findUsers() {
     return ['test'];
@@ -10,10 +11,18 @@ class MockUserService {
 abstract class ConfigService {}
 class DevelopmentConfigService extends ConfigService {}
 class ProductionConfigService extends ConfigService {}
+
+@Injectable()
+class UserHabitsFactory {
+  getHabits() {
+    return ['eat', 'sleep', 'work'];
+  }
+}
 @Module({
   imports: [],
   controllers: [UsersController],
   providers: [
+    UserHabitsFactory,
     // standard provider
     {
       provide: UserService,
@@ -27,7 +36,7 @@ class ProductionConfigService extends ConfigService {}
     //   useValue: new MockUserService(),
     // },
     {
-      provide: 'APP_NAME', // Token
+      provide: APP_NAME, // Token
       useValue: 'Nest Demo API', // Value
     },
     // custom provider using useClass syntax
@@ -37,6 +46,11 @@ class ProductionConfigService extends ConfigService {}
         process.env.NODE_ENV === 'development'
           ? DevelopmentConfigService
           : ProductionConfigService,
+    },
+    {
+      provide: USER_HABITS,
+      useFactory: (userHabits: UserHabitsFactory) => userHabits.getHabits(), // Factory function
+      inject: [UserHabitsFactory], // Dependency injection
     },
   ],
 })
