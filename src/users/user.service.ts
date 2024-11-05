@@ -1,10 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from './user.entity';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { APP_NAME, LoggerServiceAlias, USER_HABITS } from './user.constant';
 import { UserResponseDto } from './dtos/user-response.dto';
+import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
 @Injectable()
 export class UserService {
   constructor(
@@ -25,6 +26,12 @@ export class UserService {
 
   findUserById(id: string): UserEntity {
     const user = this.users.find((user) => user.id === id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+      // throw new CustomHttpException('user not found', HttpStatus.BAD_REQUEST, {
+      //   cause: new Error('Cause Error'),
+      // });
+    }
     return new UserResponseDto(user);
   }
   createUser(userData: CreateUserDto): UserEntity {
