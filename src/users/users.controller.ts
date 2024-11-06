@@ -11,6 +11,7 @@ import {
   Post,
   Query,
   Req,
+  SetMetadata,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -22,12 +23,15 @@ import { CustomValidationPipe } from './pipes/validation.pip';
 import { UserService } from './user.service';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { Request } from 'express';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('user')
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
+  // @SetMetadata('Is_Public', true)
+  @Public()
   @Get()
   find(@Req() req: Request): Promise<UserEntity[]> {
     console.log(req.body);
@@ -36,6 +40,7 @@ export class UsersController {
     });
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): UserResponseDto {
     return this.userService.findUserById(id);

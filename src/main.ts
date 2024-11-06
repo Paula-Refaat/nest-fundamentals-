@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { TimeoutInterceptor } from './common/interceptors/timeout/timeout.interceptor';
 import { CustomFilter } from './common/filters/custom.filter';
+import { AuthGuard } from './common/guards/auth/auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new CustomFilter());
+  // app.useGlobalGuards(new AuthGuard())
 
   await app.listen(3000);
 }
