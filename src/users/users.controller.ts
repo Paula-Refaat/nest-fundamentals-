@@ -24,11 +24,21 @@ import { UserService } from './user.service';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { Request } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
-
+import { ConfigService } from '@nestjs/config';
+interface EnvironmentVariables {
+  PORT: number;
+  EMAIL: string;
+}
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('user')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configServices: ConfigService<EnvironmentVariables>,
+  ) {
+    console.log(process.env.DATA_BASE);
+    console.log(this.configServices.get('EMAIL', { infer: true }));
+  }
 
   // @SetMetadata('Is_Public', true)
   @Public()
