@@ -5,6 +5,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
+  LoggerService,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -32,6 +34,7 @@ interface EnvironmentVariables {
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('user')
 export class UsersController {
+  logger: Logger = new Logger(UsersController.name);
   constructor(
     private readonly userService: UserService,
     private readonly configServices: ConfigService<EnvironmentVariables>,
@@ -53,6 +56,9 @@ export class UsersController {
   @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): UserResponseDto {
+    this.logger.log('get specific user');
+    this.logger.debug('get specific user');
+
     return this.userService.findUserById(id);
   }
 
